@@ -1,0 +1,6 @@
+[submodule "lib/dspsys_lib_channel"]
+	path = lib/dspsys_lib_channel
+	url = git@github.com:mattrw89/dspsys_lib_channel
+[submodule "lib/lib_newhaven_screen"]
+	path = lib/lib_newhaven_screen
+	url = git@github.com:earlmaier/lib_newhaven_screen
