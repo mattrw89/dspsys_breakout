@@ -32,6 +32,7 @@ typedef struct Display {
 	struct Display *right;
 	struct Display *select;
 	struct Display *back;
+	uint16_t i;
 	char characters[2][17];
 	void (*func_left)(struct Display*, Menu_enum, uint16_t);
 	void (*func_right)(struct Display*,Menu_enum, uint16_t);
@@ -52,11 +53,11 @@ void s1_back(Display *disp, Menu_enum menu_type, uint16_t value);
 
 // constructs a new menu object
 void display_ctor(Display* disp, Menu_enum menu_type, Display *left, Display *right,
-	Display *select, Display *back);
+	Display *select, Display *back, uint16_t value);
 
 void display_set_text(Display* disp, char* chars, uint8_t length);
 
-void display_set_text_2(Display* disp, char* chars, uint8_t length);
+void display_set_text_line_2(Display* disp, char* chars, uint8_t length);
 
 void delaymycode(uint16_t delaytime);
 #endif /*MENU_H_*/

@@ -1,28 +1,10 @@
-//*****************************************************************************
-//
-// hello.c - Simple hello world example.
-//
-// Copyright (c) 2006-2011 Texas Instruments Incorporated.  All rights reserved.
-// Software License Agreement
-// 
-// Texas Instruments (TI) is supplying this software for use solely and
-// exclusively on TI's microcontroller products. The software is owned by
-// TI and/or its suppliers, and is protected under applicable copyright
-// laws. You may not combine this software with "viral" open-source
-// software in order to form a larger program.
-// 
-// THIS SOFTWARE IS PROVIDED "AS IS" AND WITH ALL FAULTS.
-// NO WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING, BUT
-// NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-// A PARTICULAR PURPOSE APPLY TO THIS SOFTWARE. TI SHALL NOT, UNDER ANY
-// CIRCUMSTANCES, BE LIABLE FOR SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-// DAMAGES, FOR ANY REASON WHATSOEVER.
-// 
-// This is part of revision 7611 of the EK-LM3S8962 Firmware Package.
+
 //
 //*****************************************************************************
 #include <stdint.h>
 #include <string.h>
+#include <stdio.h>
+
 #include "inc/lm3s8962.h"
 //#include "inc/hw_sysctl.h"
 #include "inc/hw_types.h"
@@ -61,6 +43,74 @@ __error__(char *pcFilename, unsigned long ulLine)
 }
 #endif
 
+void channels_init() {
+	uint8_t i=0;
+
+	char tempi[10] = "Input ";
+	char tempo[10] = "Output ";
+	char temp[10];
+	//loop through all input channels.  should be MAX of input and output channels
+	for(i=0; i < NUM_INPUT_CHANNELS; i++) {
+
+		strncpy(temp,tempi,6);
+		temp[6] = i + 1 + 48;
+		temp[7] = '\0';
+		Channel_ctor(get_channel_from_memory(INPUT,i+1),i+1, temp, ACTIVE, INPUT);
+
+		strncpy(temp,tempo,7);
+		temp[7] = i + 1 + 48;
+		temp[8] = '\0';
+		Channel_ctor(get_channel_from_memory(OUTPUT,i+1),i+1, temp, ACTIVE, OUTPUT);
+	}
+}
+
+void menu_init(Display *one, Display *two, Display *three, Display *four, Display *five){
+	
+	two->menu_type = HOME;
+	
+	two->left = one;
+	two->right = three;
+	two->select = five;
+	two->back = four;
+	
+	one->i = 0;
+	two->i = 0;
+	three->i = 0;
+	four->i = 0;
+	five->i = 0;
+	
+	one->func_right = &s1_right;
+	two->func_right = &s1_right;
+	three->func_right = &s1_right;
+	four->func_right = &s1_right;
+	five->func_right = &s1_right;
+	
+	one->func_left = &s1_left;
+	two->func_left = &s1_left;
+	three->func_left = &s1_left;
+	four->func_left = &s1_left;
+	five->func_left = &s1_left;
+	
+	one->func_select = &s1_select;
+	two->func_select = &s1_select;
+	three->func_select = &s1_select;
+	four->func_select = &s1_select;
+	five->func_select = &s1_select;
+	
+	one->func_back = &s1_back;
+	two->func_back = &s1_back;
+	three->func_back = &s1_back;
+	four->func_back = &s1_back;
+	five->func_back = &s1_back;
+	
+	display_set_text(five, CHANNEL_DISPLAY_TEXT, 16);
+	
+	display_set_text(two, HOME_TEXT, 16);
+	display_set_text(three, HOME_TEXT, 16);
+	display_set_text(one,HOME_TEXT,16);
+	display_set_text(four,HOME_TEXT,16);
+}
+
 
 int
 main(void)
@@ -69,78 +119,88 @@ main(void)
     SysCtlClockSet(SYSCTL_SYSDIV_1 | SYSCTL_USE_OSC | SYSCTL_OSC_MAIN |
                    SYSCTL_XTAL_8MHZ);
 
+	channels_init();
 	I2CInit();
 	screen_on();
 	screen_clear();
 	
-//	Display begin;
-//	Display channel_display;
-//	Display channel_select;
-//	Display Volume;
-//	Display AMPtype;
-//	
-//	Display stage2;
-//	
-//	
-//	begin.left = &AMPtype;
-//	begin.right = &channel_select;
-//	begin.select = &stage2;
-//	begin.back = NULL;
-//	
-//	begin.menu_type = CHANNEL_DISPLAY;
-//	
-//	begin.func_right = &(s1_right);
-
 	Display* one = global_get_display(0);
 	Display* two = global_get_display(1);
 	Display* three = global_get_display(2);
 	Display* four = global_get_display(3);
-	Display* five = global_get_display(4);
-	
+	Display* five = global_get_display(4);	
 	
 	global_current_display(two);
 	
-	two->menu_type = CHANNEL_DISPLAY;
+	menu_init(one,two,three,four,five);
 	
-	two->left = one;
-	two->right = three;
-	two->select = five;
-	two->back = four;
-	
-	two->func_right = &s1_right;
-	one->func_right = &s1_right;
-	three->func_right = &s1_right;
-	
-	two->func_left = &s1_left;
-	one->func_left = &s1_left;
-	three->func_left = &s1_left;
-	
-	two->func_back = &s1_back;
-	one->func_back = &s1_back;
-	three->func_back = &s1_back;
-	four->func_back = &s1_back;
-
-	display_set_text(four, HOME_TEXT, 16);
-	display_set_text(two, CHANNEL_DISPLAY_TEXT, 16);
-	display_set_text(three, CHANNEL_SELECT_TEXT, 16);
-	display_set_text(one,AMP_TYPE_TEXT,16);
+//  	Io_enum temp_io = INPUT;
+//	uint8_t i;
+//	for(i=1; i <= 14; i++) {
+//		// 2nd argument to get_channel_from_memory is the CHANNEL NUMBER, not INDEX
+//		Channel* temp_channel = get_channel_from_memory(temp_io, i);
+//		screen_write_txt_line_2(channel_get_name(temp_channel),strlen(channel_get_name(temp_channel)));
+//		delaymycode(30);
+//		
+//		screen_clear();
+//		Cursor_enum temp_cursor = SEC_1;
+//		screen_set_cursor(temp_cursor);
+//	}
 	
 
 	screen_write_txt(&(two->characters[0][0]),strlen(two->characters[0]));
 	
-	
 
-	//Menu_enum temp = CHANNEL_DISPLAY;
-	//(*(channel_display.func_right))(&channel_display, temp, 0);
-	
+		delaymycode(30);
+		push_encoder_button();
+		
+		int testnumber = 2;
+		
 	while(true){
-		delaymycode(30);
-		turn_encoder_right();
-		delaymycode(30);
-		push_back_button();
-		delaymycode(30);
-		push_back_button();
-		delaymycode(30);
-		push_back_button();
+		
+		switch(testnumber){
+			case 1: {
+		
+			delaymycode(30);
+			turn_encoder_right();
+			
+			delaymycode(30);
+			turn_encoder_right();
+		
+			delaymycode(30);
+			turn_encoder_right();
+			break;}
+			
+			case 2:{
+				
+			delaymycode(30);
+			turn_encoder_right();
+			
+			delaymycode(30);
+			push_encoder_button();
+			while(1){
+			delaymycode(30);
+			turn_encoder_right();
+			}
+			break;
+			}	
+		
+		
+//		delaymycode(30);
+//		turn_encoder_right();
+//		delaymycode(30);
+//		turn_encoder_left();
+//		delaymycode(30);
+//		push_back_button();
+//		delaymycode(30);
+//		push_encoder_button();
+//
+////		delaymycode(30);
+////		turn_encoder_right();
+////		delaymycode(30);
+////		push_encoder_button();
+////		delaymycode(30);
+////		push_encoder_button();
 	}
+}
 }
