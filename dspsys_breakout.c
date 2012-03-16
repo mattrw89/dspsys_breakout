@@ -154,7 +154,7 @@ main(void)
 		delaymycode(30);
 		push_encoder_button();
 		
-		int testnumber = 2;
+		int testnumber = 3;
 		
 	while(true){
 		
@@ -180,27 +180,54 @@ main(void)
 			push_encoder_button();
 			while(1){
 			delaymycode(30);
-			turn_encoder_right();
+			turn_encoder_left();
 			}
 			break;
-			}	
+			}
+			
+			case 3:{ 
+			delaymycode(30);
+			push_encoder_button();
+			
+			while(1){
+			delaymycode(30);
+			turn_encoder_right();		
+
+			delaymycode(30);
+			turn_encoder_right();
+			
+			delaymycode(30);
+			turn_encoder_right();
+			}
+			break;}	
+			
+			case 4:{ 
+			delaymycode(30);
+			turn_encoder_right();		
+
+			delaymycode(30);
+			turn_encoder_right();
+			
+			delaymycode(30);
+			turn_encoder_right();
+			
+			delaymycode(30);
+			push_encoder_button();
+			
+			while(1){
+			delaymycode(30);
+			turn_encoder_right();		
+
+			delaymycode(30);
+			turn_encoder_right();
+			
+			delaymycode(30);
+			turn_encoder_right();
+			}
+			break;}	
 		
 		
-//		delaymycode(30);
-//		turn_encoder_right();
-//		delaymycode(30);
-//		turn_encoder_left();
-//		delaymycode(30);
-//		push_back_button();
-//		delaymycode(30);
-//		push_encoder_button();
-//
-////		delaymycode(30);
-////		turn_encoder_right();
-////		delaymycode(30);
-////		push_encoder_button();
-////		delaymycode(30);
-////		push_encoder_button();
+
 	}
 }
 }

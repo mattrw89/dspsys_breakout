@@ -1,5 +1,8 @@
+#include <stdio.h>
 #include "menu.h"
 #include "global.h"
+#include "../lib_newhaven_screen/screen.h"
+
 
 //------------------------------------------------------------------------------------------------------
 
@@ -55,10 +58,20 @@ void s1_right(Display *disp, Menu_enum menu_type, uint16_t value) {
 		//turning right from stage 2
 		case(2): {
 			//determines which stage 2 menu is in
-			switch((int)(menu_type && 0x0F)){
+			switch((int)(menu_type & 0x0F)){
 				//channel display stage 2
-				case 0:
-					break;
+				case 0:{
+					uint16_t temp;
+					
+					if(disp->i < 8) //8 number of outputs on the breakout box
+					temp = (disp->i)+1;
+					
+					else
+					temp = 1;
+					
+					display_ctor(oldleft,menu_type,disp,NULL,oldselect,oldback,temp);
+					break;}
+					
 				//channel select stage 2
 				case 1: {
 					uint16_t temp;
@@ -73,10 +86,34 @@ void s1_right(Display *disp, Menu_enum menu_type, uint16_t value) {
 					break;
 				}
 				//volume stage 2
-				case 2:
+				case 2:{
+					uint16_t temp;
+					
+					if(disp->i < 12)	//checks for end of volume
+					temp = (disp->i)+1;
+					
+					else 
+					temp = 1;		//wraps channel list
+					
+					display_ctor(oldleft,menu_type,disp,NULL,oldselect,oldback,temp);  //constructs the next right
 					break;
+				}
+					break;
+					
+					
 				//amp type stage 2
-				case 3:
+				case 3:{
+					uint16_t temp;
+					
+					if(disp->i < 2)	//checks for end of amp type list
+					temp = (disp->i)+1;
+					
+					else 
+					temp = 1;		//wraps channel list
+					
+					display_ctor(oldleft,menu_type,disp,NULL,oldselect,oldback,temp);  //constructs the next right
+					break;
+				}
 					break;
 			}
 		
@@ -127,13 +164,13 @@ void s1_left(Display *disp, Menu_enum menu_type, uint16_t value){
 	disp->right = oldcurrent;
 	
 	
-	switch(menu_type && 0xF0) {
+	switch((menu_type >>4)) {
 		
-		case(0x00):
+		case(0):
 			display_ctor(oldcurrent->left, menu_type, disp, NULL, oldselect, oldback,NULL);
 			break;
 	
-		case(0x10):
+		case(1):
 			if(menu_type > 0x10){
 				disp->menu_type = --menu_type;
 			} 
@@ -150,11 +187,27 @@ void s1_left(Display *disp, Menu_enum menu_type, uint16_t value){
 			display_ctor(oldcurrent->right, menu_type, NULL, disp, oldselect, oldback,NULL);
 			break;
 		
-		case(0x20):
-		
+		case(2):
+			switch((int)(menu_type & 0x0F)){
+				//channel display stage 2
+				case 0:
+					break;
+				//channel select stage 2
+				case 1: {
+					uint16_t temp;
+					
+					if(disp->i >= 2) {	//checks for end of channel list
+						temp = (disp->i) -1;
+					}else temp = NUM_OUTPUT_CHANNELS;	//wraps channel list
+					
+					display_ctor(oldright,menu_type,NULL,disp,oldselect,oldback,temp);	//constructs the next left
+					break;
+				}
+			}
 			break;
 		
-		case(0x30):
+		
+		case(3):
 			
 			break;
 	}
@@ -163,6 +216,9 @@ void s1_left(Display *disp, Menu_enum menu_type, uint16_t value){
 	Cursor_enum temp1 = SEC_1;
 	screen_set_cursor(temp1);
 	screen_write_txt(&(disp->characters[0][0]), strlen(disp->characters[0]));
+	if((disp->menu_type >> 4) > 1)  //writes second lin of charaters to screen
+		screen_write_txt_line_2(&(disp->characters[1][0]),strlen(disp->characters[1]));
+	
 	global_current_display(disp);
 	
 
@@ -193,6 +249,7 @@ void s1_select(Display *disp, Menu_enum menu_type, uint16_t value){
 			menu_type = (Menu_enum)(menu_type + 0x10);	
 			disp->menu_type = menu_type;	//changes current menu_type of screen object 
 			display_ctor(disp->left,AMP_TYPE,NULL,NULL,NULL,disp->back,NULL);	//construct future left object
+			display_ctor(disp->select,CHANNEL_DISPLAY_2,NULL,NULL,NULL,disp->back,1);	//construct future select object
 			display_ctor(disp->right,CHANNEL_SELECT,NULL,NULL,NULL,disp->back,NULL); //construct future right object
 			break;}
 			
@@ -200,19 +257,25 @@ void s1_select(Display *disp, Menu_enum menu_type, uint16_t value){
 			// second stage
 			menu_type = (Menu_enum)(menu_type + 0x10);
 			disp->menu_type = menu_type;		//updates menu type
-			
+
 			//determines which stage 2 etc. channel display, channel select
-			switch(menu_type && 0x0F){
-				case 0:		//channel display
-					break;
+			switch((disp->menu_type) & 0x0F){
+				case 0:	{	//channel display
+					display_ctor(disp->left,CHANNEL_DISPLAY_2,NULL,NULL,NULL,disp->back,8);
+					display_ctor(disp->right,CHANNEL_DISPLAY_2,NULL,NULL,NULL,disp->back,2);
+					break;}
 				case 1:{	//channel select
 					display_ctor(disp->left,CHANNEL_SELECT_2,NULL,NULL,NULL,disp->back,NUM_OUTPUT_CHANNELS);
 					display_ctor(disp->right,CHANNEL_SELECT_2,NULL,NULL,NULL,disp->back,2);
 					break;}
-				case 2:		//volume
-					break;
-				case 3:		//amp type
-					break;
+				case 2:{		//volume
+					display_ctor(disp->left,CHANNEL_VOLUME_2,NULL,NULL,NULL,disp->back,11);
+					display_ctor(disp->right,CHANNEL_VOLUME_2,NULL,NULL,NULL,disp->back,2);
+					break;}
+				case 3:	{	//amp type
+					display_ctor(disp->left,AMP_TYPE_2,NULL,NULL,NULL,disp->back,2);
+					display_ctor(disp->right,AMP_TYPE_2,NULL,NULL,NULL,disp->back,2);
+					break;}
 			}
 			
 			
@@ -222,6 +285,9 @@ void s1_select(Display *disp, Menu_enum menu_type, uint16_t value){
 			if(menu_type == CHANNEL_SELECT_2){
 			menu_type = (Menu_enum)(menu_type + 0x10);
 			disp->menu_type = menu_type;
+			
+			display_ctor(disp->left,CHANNEL_SELECT_3,NULL,NULL,NULL,disp->back,8);
+			display_ctor(disp->right,CHANNEL_SELECT_3,NULL,NULL,NULL,disp->back,2);
 			}
 			else disp->menu_type = menu_type;
 			break;}
@@ -258,7 +324,8 @@ void s1_select(Display *disp, Menu_enum menu_type, uint16_t value){
 	Cursor_enum temp1 = SEC_1;
 	screen_set_cursor(temp1);
 	screen_write_txt(&(disp->characters[0][0]), strlen(disp->characters[0]));
-	if((disp->menu_type >> 4)> 1)
+	
+	if((disp->menu_type >> 4) > 1)  //writes second lin of charaters to screen
 		screen_write_txt_line_2(&(disp->characters[1][0]),strlen(disp->characters[1]));
 	
 	
@@ -336,7 +403,72 @@ void display_ctor(Display* disp, Menu_enum menu_type, Display* left, Display* ri
 			break;}
 		
 		case CHANNEL_DISPLAY_2:{
-			display_set_text(disp, "channel dsplay 2", 16);
+			switch(value){
+				case 1:{
+					display_set_text(disp,"L/Main Speaker",16);
+					//this is just to load something onto the second line this will need to be replaced
+					Io_enum temp_io = OUTPUT;
+					Channel* temp_channel = get_channel_from_memory(temp_io, value);
+					display_set_text_line_2(disp, channel_get_name(temp_channel), 16);
+					break;
+				}
+				case 2:{
+					display_set_text(disp,"R Speaker",16);
+					//this is just to load something onto the second line this will need to be replaced
+					Io_enum temp_io = OUTPUT;
+					Channel* temp_channel = get_channel_from_memory(temp_io, value);
+					display_set_text_line_2(disp, channel_get_name(temp_channel), 16);
+					break;
+				}
+				case 3:{
+					display_set_text(disp,"L SPDIF",16);
+					//this is just to load something onto the second line this will need to be replaced
+					Io_enum temp_io = OUTPUT;
+					Channel* temp_channel = get_channel_from_memory(temp_io, value);
+					display_set_text_line_2(disp, channel_get_name(temp_channel), 16);
+					break;
+				}				
+				case 4:{
+					display_set_text(disp,"R SPDIF",16);
+					//this is just to load something onto the second line this will need to be replaced
+					Io_enum temp_io = OUTPUT;
+					Channel* temp_channel = get_channel_from_memory(temp_io, value);
+					display_set_text_line_2(disp, channel_get_name(temp_channel), 16);
+					break;
+				}
+				case 5:{
+					display_set_text(disp,"L XLR",16);
+					//this is just to load something onto the second line this will need to be replaced
+					Io_enum temp_io = OUTPUT;
+					Channel* temp_channel = get_channel_from_memory(temp_io, value);
+					display_set_text_line_2(disp, channel_get_name(temp_channel), 16);
+					break;
+				}
+				case 6:{
+					display_set_text(disp,"R XLR",16);
+					//this is just to load something onto the second line this will need to be replaced
+					Io_enum temp_io = OUTPUT;
+					Channel* temp_channel = get_channel_from_memory(temp_io, value);
+					display_set_text_line_2(disp, channel_get_name(temp_channel), 16);
+					break;
+				}
+				case 7:{
+					display_set_text(disp,"L Headphone",16);
+					//this is just to load something onto the second line this will need to be replaced
+					Io_enum temp_io = OUTPUT;
+					Channel* temp_channel = get_channel_from_memory(temp_io, value);
+					display_set_text_line_2(disp, channel_get_name(temp_channel), 16);
+					break;
+				}
+				case 8:{
+					display_set_text(disp,"R Headphone",16);
+					//this is just to load something onto the second line this will need to be replaced
+					Io_enum temp_io = OUTPUT;
+					Channel* temp_channel = get_channel_from_memory(temp_io, value);
+					display_set_text_line_2(disp, channel_get_name(temp_channel), 16);
+					break;
+				}												
+			}
 			
 			break;}
 		
@@ -348,15 +480,46 @@ void display_ctor(Display* disp, Menu_enum menu_type, Display* left, Display* ri
 			break;}
 			
 		case CHANNEL_VOLUME_2:{
-			display_set_text(disp, "volume 2", 16);
+			display_set_text(disp, VOLUME_TEXT, 16);	//volume TODO: volume display
+			display_set_text_line_2(disp, "-123456789AB+", 16);
 			break;}
 			
 		case AMP_TYPE_2:{
-			display_set_text(disp, "amp type 2", 16);
+			display_set_text(disp, AMP_TYPE_TEXT, 16);
+			switch(value){
+				case 1: display_set_text_line_2(disp, "Stereo", 16);
+				case 2: display_set_text_line_2(disp, "Mono", 16);
+			}
 			break;}
 			
 		case CHANNEL_SELECT_3:{
 			display_set_text(disp, "channel select 3", 16);
+						switch(value){
+				case 1:{
+					display_set_text_line_2(disp,"L/Main Speaker",16);
+				}
+				case 2:{
+					display_set_text_line_2(disp,"R Speaker",16);
+				}
+				case 3:{
+					display_set_text_line_2(disp,"L SPDIF",16);
+				}				
+				case 4:{
+					display_set_text_line_2(disp,"R SPDIF",16);
+				}
+				case 5:{
+					display_set_text_line_2(disp,"L XLR",16);
+				}
+				case 6:{
+					display_set_text_line_2(disp,"R XLR",16);
+				}
+				case 7:{
+					display_set_text_line_2(disp,"L Headphone",16);
+				}
+				case 8:{
+					display_set_text_line_2(disp,"R Headphone",16);
+				}												
+			}
 			break;}
 		
 		case HOME:{
