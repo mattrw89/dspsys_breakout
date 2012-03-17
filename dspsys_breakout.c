@@ -19,6 +19,7 @@
 #include "lib/lib_newhaven_screen/screen.h"
 #include "global.h"
 #include "ints.h"
+#include "lib/lib_codec_cs42448/codec.h"
 
 
 //*****************************************************************************
@@ -150,84 +151,120 @@ main(void)
 
 	screen_write_txt(&(two->characters[0][0]),strlen(two->characters[0]));
 	
-
-		delaymycode(30);
-		push_encoder_button();
-		
-		int testnumber = 3;
-		
+	delaymycode(30);
+	push_encoder_button();
+	
+	CODEC_info codec;
+	CDC_init(&codec);
+	CDC_start(&codec);
+	
+	int testnumber = 3;
+			
 	while(true){
-		
 		switch(testnumber){
 			case 1: {
-		
-			delaymycode(30);
-			turn_encoder_right();
+				delaymycode(30);
+				turn_encoder_right();
+				
+				delaymycode(30);
+				turn_encoder_right();
 			
-			delaymycode(30);
-			turn_encoder_right();
-		
-			delaymycode(30);
-			turn_encoder_right();
-			break;}
+				delaymycode(30);
+				turn_encoder_right();
+				break;
+			}
 			
 			case 2:{
+				delaymycode(30);
+				turn_encoder_right();
 				
-			delaymycode(30);
-			turn_encoder_right();
-			
-			delaymycode(30);
-			push_encoder_button();
-			while(1){
-			delaymycode(30);
-			turn_encoder_left();
-			}
-			break;
+				delaymycode(30);
+				push_encoder_button();
+				
+				while(1) {
+					delaymycode(30);
+					turn_encoder_left();
+				}
+				break;
 			}
 			
 			case 3:{ 
-			delaymycode(30);
-			push_encoder_button();
+				delaymycode(30);
+				push_encoder_button();
 			
-			while(1){
-			delaymycode(30);
-			turn_encoder_right();		
-
-			delaymycode(30);
-			turn_encoder_right();
-			
-			delaymycode(30);
-			turn_encoder_right();
-			}
-			break;}	
+				while(1){
+					delaymycode(30);
+					turn_encoder_right();		
+		
+					delaymycode(30);
+					turn_encoder_right();
+					
+					delaymycode(30);
+					turn_encoder_right();
+					
+					CDC_set_mute(&codec, ENABLE,  Aout1);
+					CDC_set_mute(&codec, ENABLE,  Aout2);
+					
+					delaymycode(30);
+					
+					CDC_set_mute(&codec, DISABLE,  Aout1);
+					CDC_set_mute(&codec, DISABLE,  Aout2);
+					
+					delaymycode(30);
+					
+					int16_t j = 0;
+					for(j=0; j < 127; j++) {
+						CDC_set_output_vol(&codec, j, Aout1);
+						CDC_set_output_vol(&codec, j, Aout2);
+						delaymycode(1);
+					}
+					
+					for(j=127; j > 0; j--) {
+						CDC_set_output_vol(&codec, j, Aout1);
+						CDC_set_output_vol(&codec, j, Aout2);
+						delaymycode(1);
+					}
+					
+					for(j=10; j > -64; j--) {
+						CDC_set_input_vol(&codec, j, Ain1);
+						CDC_set_input_vol(&codec, j, Ain2);
+						delaymycode(1);
+					}
+					
+					for(j=-64; j < 0; j++) {
+						CDC_set_input_vol(&codec, j, Ain1);
+						CDC_set_input_vol(&codec, j, Ain2);
+						delaymycode(1);
+					}
+				break;
+				}
+			}	
 			
 			case 4:{ 
-			delaymycode(30);
-			turn_encoder_right();		
-
-			delaymycode(30);
-			turn_encoder_right();
-			
-			delaymycode(30);
-			turn_encoder_right();
-			
-			delaymycode(30);
-			push_encoder_button();
-			
-			while(1){
-			delaymycode(30);
-			turn_encoder_right();		
-
-			delaymycode(30);
-			turn_encoder_right();
-			
-			delaymycode(30);
-			turn_encoder_right();
-			}
-			break;}	
+				delaymycode(30);
+				turn_encoder_right();		
+	
+				delaymycode(30);
+				turn_encoder_right();
+				
+				delaymycode(30);
+				turn_encoder_right();
+				
+				delaymycode(30);
+				push_encoder_button();
+				
+				while(1){
+					delaymycode(30);
+					turn_encoder_right();		
 		
-		
-
+					delaymycode(30);
+					turn_encoder_right();
+					
+					delaymycode(30);
+					turn_encoder_right();
+				}
+				break;
+			}	
+		}
 	}
-}
 }
