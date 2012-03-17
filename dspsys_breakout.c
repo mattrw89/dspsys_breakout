@@ -160,8 +160,8 @@ main(void)
 	
 	int testnumber = 3;
 			
-	while(true){
-		switch(testnumber){
+	while(true) {
+		switch(testnumber) {
 			case 1: {
 				delaymycode(30);
 				turn_encoder_right();
@@ -174,7 +174,7 @@ main(void)
 				break;
 			}
 			
-			case 2:{
+			case 2: {
 				delaymycode(30);
 				turn_encoder_right();
 				
@@ -188,11 +188,11 @@ main(void)
 				break;
 			}
 			
-			case 3:{ 
+			case 3: { 
 				delaymycode(30);
 				push_encoder_button();
 			
-				while(1){
+				while(1) {
 					delaymycode(30);
 					turn_encoder_right();		
 		
@@ -240,7 +240,7 @@ main(void)
 				}
 			}	
 			
-			case 4:{ 
+			case 4: { 
 				delaymycode(30);
 				turn_encoder_right();		
 	
@@ -253,7 +253,7 @@ main(void)
 				delaymycode(30);
 				push_encoder_button();
 				
-				while(1){
+				while(1) {
 					delaymycode(30);
 					turn_encoder_right();		
 		
