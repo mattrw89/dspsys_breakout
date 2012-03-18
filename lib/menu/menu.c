@@ -283,13 +283,21 @@ void s1_select(Display *disp, Menu_enum menu_type, uint16_t value){
 			
 		case 2:{
 			if(menu_type == CHANNEL_SELECT_2){
-			menu_type = (Menu_enum)(menu_type + 0x10);
-			disp->menu_type = menu_type;
+				menu_type = (Menu_enum)(menu_type + 0x10);
+				disp->menu_type = menu_type;
 			
-			display_ctor(disp->left,CHANNEL_SELECT_3,NULL,NULL,NULL,disp->back,8);
-			display_ctor(disp->right,CHANNEL_SELECT_3,NULL,NULL,NULL,disp->back,2);
+				display_ctor(disp->left,CHANNEL_SELECT_3,NULL,NULL,NULL,disp->back,8);
+				display_ctor(disp->right,CHANNEL_SELECT_3,NULL,NULL,NULL,disp->back,2);
+				
 			}
-			else disp->menu_type = menu_type;
+			else { 
+				disp->menu_type = HOME;
+				
+				display_ctor(disp->left,HOME,NULL,NULL,NULL,NULL,NULL);
+				display_ctor(disp->right,HOME,NULL,NULL,NULL,NULL,NULL);
+				display_ctor(disp->back,HOME,NULL,NULL,NULL,NULL,NULL);
+				display_ctor(disp->select,CHANNEL_DISPLAY,NULL,NULL,NULL,NULL,NULL);
+			}
 			break;}
 		
 		case 3:{
@@ -297,24 +305,28 @@ void s1_select(Display *disp, Menu_enum menu_type, uint16_t value){
 			break;}
 	}
 
-	switch(((int)menu_type >> 4)){
+	switch ( (int)(menu_type >> 4) ) {
+		//IF MENU TYPE IS HOME
 		case 0:
 			menu_type = (Menu_enum)(menu_type + 0x10);
 			break;
-			
+		//if menu type is stage 2 
 		case 1:
 			menu_type = (Menu_enum)(menu_type + 0x10);
 			break;
-			
-		case 2:
-			if(menu_type == 0x21){
-			menu_type = (Menu_enum)(menu_type + 0x10);
+		//if menu type is stage 3
+		case 2: {
+			if(menu_type == 0x21) {
+				menu_type = (Menu_enum)(menu_type + 0x10);
+				break;
+			} else { 
+				menu_type = HOME;
+				break;
 			}
-			else disp->menu_type = menu_type;
-			break;
-		
+		}
+		//if menu type is stage 4
 		case 3:
-			disp->menu_type = menu_type;
+			menu_type = HOME;
 			break;
 	}
 	
@@ -487,8 +499,14 @@ void display_ctor(Display* disp, Menu_enum menu_type, Display* left, Display* ri
 		case AMP_TYPE_2:{
 			display_set_text(disp, AMP_TYPE_TEXT, 16);
 			switch(value){
-				case 1: display_set_text_line_2(disp, "Stereo", 16);
-				case 2: display_set_text_line_2(disp, "Mono", 16);
+				case 1: {
+					 display_set_text_line_2(disp, "Stereo", 16);
+					 break;
+				}
+				case 2: {
+					display_set_text_line_2(disp, "Mono", 16);
+					break;
+				}
 			}
 			break;}
 			
@@ -497,27 +515,35 @@ void display_ctor(Display* disp, Menu_enum menu_type, Display* left, Display* ri
 						switch(value){
 				case 1:{
 					display_set_text_line_2(disp,"L/Main Speaker",16);
+					break;
 				}
 				case 2:{
 					display_set_text_line_2(disp,"R Speaker",16);
+					break;
 				}
 				case 3:{
 					display_set_text_line_2(disp,"L SPDIF",16);
+					break;
 				}				
 				case 4:{
 					display_set_text_line_2(disp,"R SPDIF",16);
+					break;
 				}
 				case 5:{
 					display_set_text_line_2(disp,"L XLR",16);
+					break;
 				}
 				case 6:{
 					display_set_text_line_2(disp,"R XLR",16);
+					break;
 				}
 				case 7:{
 					display_set_text_line_2(disp,"L Headphone",16);
+					break;
 				}
 				case 8:{
 					display_set_text_line_2(disp,"R Headphone",16);
+					break;
 				}												
 			}
 			break;}
